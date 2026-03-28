@@ -1,0 +1,83 @@
+.auth-container {
+    max-width: 450px;
+    margin: 60px auto;
+    padding: 40px;
+    border-radius: 15px;
+    background-color: #ffffff;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+    font-family: 'Pretendard', sans-serif;
+}
+
+h2 {
+    text-align: center;
+    color: #333;
+    margin-bottom: 10px;
+}
+
+.auth-subtitle {
+    text-align: center;
+    color: #777;
+    font-size: 14px;
+    margin-bottom: 30px;
+}
+
+/* 입력 그룹 */
+.input-group {
+    margin-bottom: 20px;
+}
+
+.input-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: #444;
+    font-size: 14px;
+}
+
+.input-group input {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    box-sizing: border-box; /* 패딩 포함 너비 계산 */
+    font-size: 15px;
+    transition: border-color 0.3s;
+}
+
+.input-group input:focus {
+    border-color: #4CAF50;
+    outline: none;
+}
+
+/* 버튼 */
+.btn-submit {
+    width: 100%;
+    padding: 15px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background 0.3s;
+    margin-top: 10px;
+}
+
+.btn-submit:hover {
+    background-color: #45a049;
+}
+
+/* 푸터 */
+.auth-footer {
+    margin-top: 20px;
+    text-align: center;
+    font-size: 14px;
+    color: #666;
+}
+
+.auth-footer a {
+    color: #4CAF50;
+    text-decoration: none;
+    font-weight: bold;
+}
