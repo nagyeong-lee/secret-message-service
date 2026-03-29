@@ -10,6 +10,26 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/6.0/ref/settings/
 """
 
+import environ
+import os
+from pathlib import Path
+
+# 1. 환경 변수를 읽어올 객체를 만듭니다.
+env = environ.Env(
+    # 기본값 설정 (선택 사항)
+    DEBUG=(bool, False)
+)
+
+# 2. 프로젝트의 기본 디렉토리(Base Directory) 설정
+BASE_DIR = Path(__file__).resolve().parent.parent
+
+# 3. .env 파일을 읽어옵니다.
+environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
+
+import pymysql
+pymysql.version_info = (2, 2, 1, 'final', 0)
+pymysql.install_as_MySQLdb()
+
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -76,10 +96,16 @@ WSGI_APPLICATION = 'config.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
 
+# settings.py 상단에 django-environ 설정이 되어있어야 해요!
+
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': env('DB_NAME'),
+        'USER': env('DB_USER'),
+        'PASSWORD': env('DB_PASSWORD'),
+        'HOST': env('DB_HOST'),
+        'PORT': env('DB_PORT'),
     }
 }
 

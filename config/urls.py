@@ -1,13 +1,13 @@
 from django.contrib import admin
 from django.urls import path
-from api.views import main_index, create_message, view_message, signup_view, login_view
+from api import views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', main_index),
-    path('auth/signup/', signup_view),
-    path('auth/login/', login_view),
-    path('auth/logout/', lambda r: [logout(r), redirect('/')][1]), # 로그아웃 후 메인으로
-    path('api/create/', create_message),
-    path('api/message/<uuid:message_id>/', view_message),
+
+    # 메시지 생성 (POST)
+    path('api/create/', views.MessageCreateView.as_view(), name='message-create'),
+
+    # 메시지 읽기 및 삭제 (GET)
+    path('api/message/<uuid:pk>/', views.MessageDetailView.as_view(), name='message-detail'),
 ]
