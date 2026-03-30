@@ -1,0 +1,48 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pung Message - 비밀 메시지 서비스</title>
+    
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+</head>
+<body>
+    <div class="container">
+    <h1>💣 Pung Message</h1>
+
+    {% if user.is_authenticated %}
+        <p>반갑습니다, <strong>{{ user.username }}</strong>님!</p>
+        <textarea id="messageInput" placeholder="비밀 내용을 입력하세요..."></textarea>
+        <button id="generateBtn" class="btn-main">QR 메시지 생성하기</button>
+    {% else %}
+        <p>이 서비스는 회원 전용입니다.<br>로그인 후 비밀 메시지를 만들어보세요.</p>
+        <button onclick="location.href='/auth/login/'" class="btn-main">로그인하러 가기</button>
+        <div style="margin-top: 15px;">
+            <a href="/auth/signup/">아직 회원이 아니신가요?</a>
+        </div>
+    {% endif %}
+    </div>
+
+    <script>
+        document.getElementById('generateBtn').addEventListener('click', function() {
+            const message = document.getElementById('messageInput').value;
+            if (!message) { alert("메시지를 입력해주세요!"); return; }
+
+            // 화면 전환 및 QR 생성 (임시)
+            document.getElementById('messageInput').style.display = 'none';
+            this.style.display = 'none';
+            document.getElementById('qr-result').style.display = 'block';
+
+            new QRCode(document.getElementById("qrcode"), {
+                text: "https://example.com/view/temp", // 추후 백엔드 데이터와 연결
+                width: 180,
+                height: 180
+            });
+        });
+    </script>
+</body>
+</html>

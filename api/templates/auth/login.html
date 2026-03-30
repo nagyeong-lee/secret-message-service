@@ -1,0 +1,37 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>로그인 - Pung Message</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body>
+    <div class="auth-container">
+        <h2>🔑 로그인</h2>
+        <p>비밀 메시지를 생성하려면<br>계정에 로그인하세요.</p>
+        
+        <form method="POST" action="/auth/login/" class="auth-form">
+            {% csrf_token %}
+            
+            <div class="input-group">
+                <input type="text" name="username" placeholder="아이디" required>
+            </div>
+
+            <div class="input-group">
+                <input type="password" name="password" placeholder="비밀번호" required>
+            </div>
+
+            <button type="submit" class="btn-submit">로그인</button>
+            
+            <div class="auth-footer">
+                아직 회원이 아니신가요? <a href="/auth/signup/">회원가입</a>
+            </div>
+            <div class="auth-footer" style="margin-top: 10px;">
+                <a href="/" style="color: #b2bec3; font-weight: normal;">메인으로 돌아가기</a>
+            </div>
+        </form>
+    </div>
+</body>
+</html>
