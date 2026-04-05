@@ -8,14 +8,11 @@
 </head>
 
 <body>
-    <div class="auth-container">
-        <h2>🛡️ 회원가입</h2>
-        <p class="auth-subtitle">정보를 입력하여 계정을 생성하세요.</p>
+    <div class="container">
+        <h2>💣 Pung Message 회원가입</h2>
         
-        <form method="POST" class="auth-form">
-            {% csrf_token %}
-            
-            <div class="input-group">
+        <form method="POST" onsubmit="alert('회원가입이 완료되었습니다!');">
+            {% csrf_token %} <div class="input-group">
                 <label>아이디</label>
                 <input type="text" name="username" placeholder="사용할 아이디 입력" required>
             </div>
@@ -27,7 +24,7 @@
 
             <div class="input-group">
                 <label>전화번호</label>
-                <input type="tel" name="phone" placeholder="010-0000-0000" required>
+                <input type="tel" name="phone" placeholder="010-0000-0000">
             </div>
 
             <div class="input-group">
@@ -40,10 +37,10 @@
                 <input type="password" name="password_confirm" placeholder="비밀번호 재입력" required>
             </div>
 
-            <button type="submit" class="btn-submit">가입하기</button>
+            <button type="submit" class="btn-main">가입하기</button>
             
-            <div class="auth-footer">
-                이미 계정이 있으신가요? <a href="/auth/login/">로그인</a>
+            <div class="auth-footer" style="margin-top: 20px; font-size: 0.9rem;">
+                이미 계정이 있으신가요? <a href="/auth/login/" style="color: #6c5ce7;">로그인</a>
             </div>
         </form>
     </div>
