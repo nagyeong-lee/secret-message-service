@@ -11,6 +11,6 @@ urlpatterns = [
     path('auth/login/', views.login_view, name='login'),
 
     # 2. 백엔드 API (팀원이 만든 기능)
-    path('api/', include('api.urls')), 
+    path('', include('api.urls')), 
 ]
 

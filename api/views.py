@@ -1,98 +1,97 @@
+from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib.auth import authenticate, login as auth_login
+from django.contrib.auth.models import User
+from django.contrib.auth.decorators import login_required
 from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticated
 from .models import SecretMessage
 from .serializers import SecretMessageSerializer
-from django.shortcuts import render, redirect
-from django.contrib.auth.decorators import login_required# 보안 데코레이터
-from django.contrib.auth import authenticate, login as auth_login
-from django.contrib.auth.models import User
+from django.core.exceptions import ValidationError # 추가
 
-# --- 1. 화면(HTML)을 보여주는 기능 (프론트엔드) ---
+# --- 1. 화면(HTML) 렌더링 기능 ---
 
 # [메인 화면]
 @login_required(login_url='/auth/login/')
 def main_index(request):
     return render(request, 'index.html')
 
-
-# [회원가입 로직]
+# [회원가입]
 def signup_view(request):
     if request.method == 'POST':
         username = request.POST.get('username')
         email = request.POST.get('email')
         password = request.POST.get('password')
-
         if username and password:
             User.objects.create_user(username=username, email=email, password=password)
             return redirect('/auth/login/')
-
     return render(request, 'auth/signup.html')
 
-
-# [로그인 로직]
+# [로그인]
 def login_view(request):
     if request.method == 'POST':
         username = request.POST.get('username')
         password = request.POST.get('password')
-
         user = authenticate(request, username=username, password=password)
-
         if user is not None:
             auth_login(request, user)
-            return redirect('/')  # 로그인 성공하면 메인으로!
+            return redirect('/')
         else:
-            return render(request, 'auth/login.html', {'error': '아이디나 비번이 틀렸어요!'})
-
+            return render(request, 'auth/login.html', {'error': '아이디나 비밀번호가 틀렸습니다.'})
     return render(request, 'auth/login.html')
 
+# [비밀 메시지 확인 화면] - 에러 핸들링 강화 버전
+def view_message(request, message_id):
+    """
+    사용자가 QR 코드를 찍고 들어왔을 때 메시지를 보여주는 함수.
+    읽는 순간 삭제되며, 이미 삭제된 경우 안내 문구를 출력합니다.
+    """
+    try:
+        # 1. DB에서 메시지 조회
+        message = SecretMessage.objects.get(pk=message_id)
+        content = message.content
+        
+        # 2. 보안 핵심: 보여주기 직전 DB에서 즉시 삭제 (휘발성)
+        message.delete()
+        
+        return render(request, 'view_message.html', {'content': content})
+
+    except (SecretMessage.DoesNotExist, ValidationError):
+        # 3. 메시지가 없거나 이미 삭제된 경우 (또는 유효하지 않은 ID인 경우)
+        return render(request, 'view_message.html', {
+            'error': "이미 확인했거나 존재하지 않는 비밀 메시지입니다! 💣"
+        })
 
 
+# --- 2. 데이터 처리(API) 기능 ---
 
-# --- 2. 데이터를 처리하는 기능 (백엔드 API) ---
-
-# 메시지 저장 (POST)
+# [메시지 생성 API]
 class MessageCreateView(APIView):
-    def post(self, request):
-        serializer = SecretMessageSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    permission_classes = [IsAuthenticated]
 
-# 메시지 읽기 및 폭파 (GET)
+    def post(self, request):
+        content = request.data.get('content')
+        if content:
+            new_msg = SecretMessage.objects.create(
+                user=request.user,
+                content=content
+            )
+            return Response({
+                "status": "success",
+                "secret_url": f"/view/{new_msg.id}/"
+            }, status=status.HTTP_201_CREATED)
+        
+        return Response({"error": "내용이 없습니다."}, status=status.HTTP_400_BAD_REQUEST)
+
+# [메시지 상세 정보 API]
 class MessageDetailView(APIView):
     def get(self, request, pk):
         try:
             message = SecretMessage.objects.get(pk=pk)
             serializer = SecretMessageSerializer(message)
-
-            # 보안 핵심: 읽자마자 DB에서 바로 삭제
             response_data = serializer.data
-            message.delete()
-
+            message.delete() 
             return Response(response_data)
         except SecretMessage.DoesNotExist:
             return Response({"error": "이미 읽었거나 없는 메시지입니다."}, status=status.HTTP_404_NOT_FOUND)
-
-        class MessageCreateView(APIView):
-            permission_classes = [IsAuthenticated]  # 로그인 필수
-
-            def post(self, request):
-                content = request.data.get('content')  # 화면에서 쓴 글 가져오기
-
-                if content:
-                    # 1. DB 저장 (작성자 포함)
-                    new_msg = SecretMessage.objects.create(
-                        user=request.user,
-                        content=content
-                    )
-
-                    # 2. 결과 응답 (상대방 확인용 주소까지 생성)
-                    return Response({
-                        "status": "success",
-                        "message_id": new_msg.id,
-                        "detail_url": f"/api/messages/{new_msg.id}/"  # 큐알에 들어갈 주소
-                    }, status=status.HTTP_201_CREATED)
-
-                return Response({"error": "내용 없음"}, status=status.HTTP_400_BAD_REQUEST)

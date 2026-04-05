@@ -1,0 +1,25 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>비밀 메시지 확인</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body>
+    <div class="container">
+    {% if error %}
+        <h2 style="color: #ff7675;">⚠️ 확인 불가</h2>
+        <p>{{ error }}</p>
+    {% else %}
+        <h2>🔒 도착한 비밀 메시지</h2>
+        <div class="message-box">
+            <p>{{ content }}</p>
+        </div>
+        <p class="warning">⚠️ 주의: 이 메시지는 확인 후 즉시 파괴되었습니다.</p>
+    {% endif %}
+
+    <button onclick="location.href='/'" class="btn-main">홈으로 돌아가기</button>
+</div>
+</body>
+</html>
