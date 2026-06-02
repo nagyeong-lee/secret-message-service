@@ -14,6 +14,7 @@ class SecretMessage(models.Model):
     content = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
     is_read = models.BooleanField(default=False)
+    duration = models.IntegerField(default=10)
 
     def __str__(self):
         return f"Message {self.id}"
