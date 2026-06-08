@@ -6,8 +6,20 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>비밀 메시지 확인 - Pung Message</title>
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <style>
+        /* [캡처방지 추가] 화면 캡처 시도 시 덮는 검은 오버레이 */
+        #blackout {
+            position: fixed; inset: 0; background: #000; color: #fff;
+            display: none; align-items: center; justify-content: center;
+            z-index: 99999; font-size: 1.2rem; text-align: center;
+        }
+        #blackout.active { display: flex; }
+    </style>
 </head>
 <body>
+    <!-- [캡처방지 추가] -->
+    <div id="blackout">🚫 화면 캡처는 허용되지 않습니다.</div>
+
     <div class="container">
         {% if not error %}
             <h1>🔒 도착한 비밀 메시지</h1>
@@ -65,5 +77,42 @@
             }
         {% endif %}
     </script>
+
+    <!-- [캡처방지 추가] 1번 파일과 동일하게 독립 블록으로 분리 -->
+    {% if not error %}
+    <script>
+    (function () {
+        const box = document.querySelector('.message-content-box');
+        const blackout = document.getElementById('blackout');
+
+        // 1) 탭 전환·포커스 상실 시 내용 가림 (캡처 도구가 화면을 떠나는 순간 차단)
+        function hide() { if (box) box.style.filter = 'blur(28px)'; }
+        function show() { if (box) box.style.filter = 'none'; }
+        document.addEventListener('visibilitychange', () => { if (document.hidden) hide(); });
+        window.addEventListener('blur', hide);
+        window.addEventListener('focus', show);
+
+        // 2) PrintScreen 감지 → 블랙아웃 + 클립보드 무력화
+        function triggerBlackout() {
+            blackout.classList.add('active');
+            try { navigator.clipboard.writeText(''); } catch (e) {}
+            setTimeout(() => blackout.classList.remove('active'), 1500);
+        }
+        document.addEventListener('keyup', e => { if (e.key === 'PrintScreen') triggerBlackout(); });
+        document.addEventListener('keydown', function (e) {
+            const k = (e.key || '').toLowerCase();
+            if (e.key === 'PrintScreen') { triggerBlackout(); e.preventDefault(); }
+            if (e.ctrlKey && (k === 's' || k === 'p' || k === 'u')) e.preventDefault();
+            if (e.key === 'F12') e.preventDefault();
+            if (e.ctrlKey && e.shiftKey && (k === 'i' || k === 'c' || k === 'j')) e.preventDefault();
+        });
+
+        // 3) 우클릭 / 복사 / 드래그 차단
+        document.addEventListener('contextmenu', e => e.preventDefault());
+        document.addEventListener('copy', e => e.preventDefault());
+        document.addEventListener('dragstart', e => e.preventDefault());
+    })();
+    </script>
+    {% endif %}
 </body>
 </html>
